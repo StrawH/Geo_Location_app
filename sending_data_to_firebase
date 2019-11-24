@@ -1,0 +1,63 @@
+// esp8266 community 2.5.2
+
+#include <ESP8266WiFi.h>
+#include<FirebaseArduino.h>
+
+#define FIREBASE_HOST ""
+#define FIREBASE_AUTH ""
+
+#define WIFI_SSID ""
+#define WIFI_PASSWORD ""
+
+void setup()
+{
+  Serial.begin(9600);
+
+  Serial.println("Serial communication started\n\n");
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);                                     //try to connect with wifi
+  Serial.print("Connecting to ");
+  Serial.print(WIFI_SSID);
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(500);
+  }
+
+  Serial.println();
+  Serial.print("Connected to ");
+  Serial.println(WIFI_SSID);
+  Serial.print("IP Address is : ");
+  Serial.println(WiFi.localIP());                                            //print local IP address
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);   // connect to firebase
+  delay(1000);
+}
+
+void loop()
+{
+
+  // Firebase Error Handling ************************************************
+  if (Firebase.failed())
+  {
+  delay(500);
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+    Serial.println(Firebase.error());
+    Serial.println("Connection to fiebase failed. Reconnecting...");
+    delay(500);
+  }
+
+  else {
+    Serial.println("Everything is ready!");
+    Firebase.setFloat("lat", 30.295707731);
+    delay(300);
+    
+    Firebase.setFloat("long", 31.2892456);
+    delay(300);
+    
+    Firebase.setFloat("lat", 31.2892456);
+    delay(300);
+    
+    Firebase.setFloat("long", 30.295707731);
+    delay(300);
+  }
+}
