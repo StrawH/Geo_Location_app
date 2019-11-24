@@ -1,0 +1,82 @@
+#include <ESP8266WiFi.h>
+#include<FirebaseArduino.h>
+#include "location.h"
+
+#define FIREBASE_HOST ""
+#define FIREBASE_AUTH ""
+
+#define WIFI_SSID ""
+#define WIFI_PASSWORD "e"
+// Google API key
+String geolocationKey = "";
+String geocodingKey   = "";
+
+// From http://www.mcc-mnc.com/
+int MCC = 602;  // Egypt Country Code
+int MNC = 2;    // Egypt Network Code
+String carrier = "Vodafone";
+
+Location myLocation;
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("Serial communication started");
+
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);                                     //try to connect with wifi
+  Serial.print("Connecting to ");
+  Serial.print(WIFI_SSID);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+  }
+  Serial.println();
+  Serial.print("Connected to ");
+  Serial.println(WIFI_SSID);
+  Serial.print("IP Address is : ");
+  Serial.println(WiFi.localIP());//print local IP address
+
+  myLocation.begin(geolocationKey, geocodingKey, MCC, MNC, carrier);
+
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);   // connect to firebase
+  delay(1000);
+}
+
+void loop() {
+  // Firebase Error Handling ************************************************
+  myLocation.getLocation();
+  Serial.print("Latitude = ");     Serial.println(myLocation.latitude, 7);
+  Serial.print("Longitude = ");    Serial.println(myLocation.longitude, 7);
+  Serial.print("Accuracy = ");     Serial.println(myLocation.accuracy);
+  Serial.print("Address: ");       Serial.println(myLocation.address);
+  Serial.println("-------------------------");
+
+  if (Firebase.failed())
+  { delay(500);
+    Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+    Serial.println(Firebase.error());
+    Serial.println("Connection to fiebase failed. Reconnecting...");
+    delay(500);
+    //Firebase.setInt("/data", val);
+
+  }
+
+  else {
+    Serial.println("Everything is ready!");
+    Serial.println(Firebase.error());
+
+    // sending lat and long to cloud
+    Firebase.setFloat("lat", myLocation.latitude);
+    //Serial.println(val);
+    delay(300);
+    Firebase.setFloat("long", myLocation.longitude);
+    //Serial.println(val);
+    delay(300);
+
+  }
+  delay(30000);
+}
