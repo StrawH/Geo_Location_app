@@ -61,8 +61,6 @@ void loop() {
     Serial.println(Firebase.error());
     Serial.println("Connection to fiebase failed. Reconnecting...");
     delay(500);
-    //Firebase.setInt("/data", val);
-
   }
 
   else {
@@ -71,10 +69,8 @@ void loop() {
 
     // sending lat and long to cloud
     Firebase.setFloat("lat", myLocation.latitude);
-    //Serial.println(val);
     delay(300);
     Firebase.setFloat("long", myLocation.longitude);
-    //Serial.println(val);
     delay(300);
 
   }
